@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import AdBanner from './AdBanner';
@@ -48,6 +49,7 @@ const INSIGHTS = [
 
 export default function Assignments() {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [listings, setListings] = useState([]);
     const [loadingListings, setLoadingListings] = useState(true);
     const [submittingListing, setSubmittingListing] = useState(false);
@@ -174,7 +176,17 @@ export default function Assignments() {
                                     </div>
                                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
                                         <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 20, letterSpacing: '-0.03em', color: 'var(--tertiary)', marginBottom: 10 }}>{item.price}</div>
-                                        <button className="btn-ghost-cyan" style={{ padding: '7px 16px', fontSize: 11, whiteSpace: 'nowrap' }}>
+                                        <button
+                                            className="btn-ghost-cyan"
+                                            style={{ padding: '7px 16px', fontSize: 11, whiteSpace: 'nowrap' }}
+                                            onClick={() => {
+                                                if (item.user_id === user?.id) {
+                                                    alert('You cannot contact yourself');
+                                                } else {
+                                                    navigate(`/messages?with=${item.user_id}&name=${encodeURIComponent(item.seller_name)}`);
+                                                }
+                                            }}
+                                        >
                                             <span className="material-symbols-outlined" style={{ fontSize: 14 }}>send</span>
                                             {item.cat === 'Study Sessions' ? 'Join Session' : 'Contact Seller'}
                                         </button>

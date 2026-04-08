@@ -10,6 +10,7 @@ const NAV = [
     { icon: 'storefront', label: 'Marketplace', to: '/assignments' },
     { icon: 'explore', label: 'Explore', to: '/map' },
     { icon: 'campaign', label: 'Feed', to: '/feed' },
+    { icon: 'mail', label: 'Messages', to: '/messages' },
     { icon: 'sell', label: 'Deals', to: '/discounts' },
     { icon: 'location_city', label: 'Listings', to: '/listings' },
     { icon: 'how_to_vote', label: 'Pulse', to: '/poll' },

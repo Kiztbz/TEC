@@ -15,6 +15,7 @@ import Listings from './components/Listings';
 import About from './components/About';
 import Poll from './components/Poll';
 import MemberPortal from './components/MemberPortal';
+import Messages from './components/Messages';
 import SplashScreen from './components/SplashScreen';
 import LandingPage from './components/LandingPage';
 import AuthCallback from './components/AuthCallback';
@@ -80,6 +81,7 @@ function AppShell() {
           <Route path="/about" element={<About />} />
           <Route path="/poll" element={<Poll />} />
           <Route path="/profile" element={<MemberPortal />} />
+          <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute minRole="admin"><AdminPanel /></ProtectedRoute>} />
           <Route path="/admin/hostel" element={<ProtectedRoute minRole="admin"><HostelManagement /></ProtectedRoute>} />
           <Route path="/login" element={<Login />} />

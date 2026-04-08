@@ -2,6 +2,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import HostelManagementSystem from './HostelManagementSystem';
 
 const ROLE_META = {
   admin: { color: '#FF6E84', bg: 'rgba(255,110,132,0.10)', border: 'rgba(255,110,132,0.25)' },
@@ -18,6 +19,7 @@ const TABS = [
   { id: 'members', icon: 'people', label: 'Members' },
   { id: 'referrals', icon: 'card_giftcard', label: 'Referrals' },
   { id: 'analytics', icon: 'analytics', label: 'Analytics' },
+  { id: 'hms', icon: 'apartment', label: 'Hostel Mgmt' },
 ];
 
 const CAT_COLOR = {
@@ -913,6 +915,15 @@ export default function AdminPanel() {
                 </div>
               </>
             )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── HOSTEL MANAGEMENT SYSTEM TAB ── */}
+      <AnimatePresence>
+        {tab === 'hms' && (
+          <motion.div key="hms" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+            <HostelManagementSystem />
           </motion.div>
         )}
       </AnimatePresence>
