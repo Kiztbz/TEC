@@ -43,6 +43,175 @@ function RoleBadge({ role }) {
   );
 }
 
+function HMSAdminView({ showToast }) {
+  const [tenants, setTenants] = useState([]);
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [approvingId, setApprovingId] = useState(null);
+
+  useEffect(() => { fetchAll(); }, []);
+
+  async function fetchAll() {
+    setLoading(true);
+    const [{ data: t }, { data: p }] = await Promise.all([
+      supabase.from('hms_tenants').select('*').order('created_at', { ascending: false }),
+      supabase.from('hms_properties').select('*').order('created_at', { ascending: false }),
+    ]);
+    setTenants(t || []);
+    setProperties(p || []);
+    setLoading(false);
+  }
+
+  async function toggleApproval(prop) {
+    setApprovingId(prop.id);
+    const { error } = await supabase
+      .from('hms_properties')
+      .update({ tec_approved: !prop.tec_approved })
+      .eq('id', prop.id);
+    setApprovingId(null);
+    if (error) { showToast('Error: ' + error.message); return; }
+    setProperties(ps => ps.map(p => p.id === prop.id ? { ...p, tec_approved: !p.tec_approved } : p));
+    showToast(prop.tec_approved ? 'Approval revoked.' : 'Listing approved — now live on TEC!');
+  }
+
+  const pendingApproval = properties.filter(p => p.listed_on_tec && !p.tec_approved);
+  const liveListings = properties.filter(p => p.listed_on_tec && p.tec_approved);
+
+  return (
+    <div>
+      <div style={{ marginBottom: 24 }}>
+        <div className="eyebrow" style={{ marginBottom: 4 }}>HMS Control</div>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 22, letterSpacing: '-0.03em' }}>
+          Hostel Management <span style={{ color: 'var(--primary)' }}>Tenants</span>
+        </h2>
+        <p style={{ color: 'var(--on-surface-var)', fontSize: 13, marginTop: 6 }}>Manage hostel owners on the HMS SaaS platform and approve TEC listing requests.</p>
+      </div>
+
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10, marginBottom: 24 }}>
+        {[
+          { label: 'Total Tenants', value: tenants.length, color: 'var(--primary)' },
+          { label: 'Properties', value: properties.length, color: 'var(--secondary)' },
+          { label: 'Pending Approval', value: pendingApproval.length, color: '#e3b341' },
+          { label: 'Live on TEC', value: liveListings.length, color: 'var(--tertiary)' },
+        ].map(s => (
+          <div key={s.label} className="neon-card" style={{ padding: '14px', borderTop: `2px solid ${s.color}` }}>
+            <div style={{ fontSize: 8, color: 'var(--on-surface-var)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>{s.label}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 24, color: s.color }}>{s.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Pending approvals */}
+      {pendingApproval.length > 0 && (
+        <div style={{ marginBottom: 24 }}>
+          <div className="eyebrow" style={{ marginBottom: 10, color: '#e3b341' }}>⏳ Pending TEC Listing Approval ({pendingApproval.length})</div>
+          {pendingApproval.map(prop => {
+            const tenant = tenants.find(t => t.id === prop.tenant_id);
+            return (
+              <div key={prop.id} className="neon-card" style={{ padding: '16px 18px', marginBottom: 8, borderLeft: '3px solid #e3b341' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 15 }}>{prop.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--on-surface-var)', marginBottom: 4 }}>{prop.loc} • Rs.{prop.price} • {prop.gender}</div>
+                    <div style={{ fontSize: 11, color: 'var(--on-surface-var)' }}>
+                      Tenant: <strong style={{ color: 'var(--on-surface)' }}>{tenant?.owner_name || '—'}</strong> ({tenant?.email || '—'})
+                      <span style={{ marginLeft: 8, padding: '1px 6px', borderRadius: 4, background: 'rgba(204,151,255,0.1)', color: 'var(--primary)', fontSize: 9, fontWeight: 700 }}>{(tenant?.plan || 'free').toUpperCase()}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginTop: 6 }}>
+                      {(prop.tags || []).map(t => <span key={t} className="tag-ghost" style={{ fontSize: 9 }}>{t}</span>)}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                    <button
+                      onClick={() => toggleApproval(prop)}
+                      disabled={approvingId === prop.id}
+                      style={{ padding: '7px 16px', borderRadius: 8, border: '1px solid rgba(74,222,128,0.3)', background: 'rgba(74,222,128,0.08)', color: '#4ade80', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-display)', fontWeight: 700, opacity: approvingId === prop.id ? 0.6 : 1 }}>
+                      {approvingId === prop.id ? '…' : '✓ Approve & List'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* All tenants */}
+      <div className="eyebrow" style={{ marginBottom: 10 }}>All Tenants</div>
+      {loading && <div style={{ textAlign: 'center', padding: 40, color: 'var(--on-surface-var)' }}>Loading…</div>}
+      {!loading && tenants.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--on-surface-var)' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 36, opacity: 0.2, display: 'block', marginBottom: 8 }}>apartment</span>
+          No HMS tenants yet. Direct hostel owners to hms.yourdomain.com to sign up.
+        </div>
+      )}
+      {tenants.map(tenant => {
+        const tenantProps = properties.filter(p => p.tenant_id === tenant.id);
+        const livePropCount = tenantProps.filter(p => p.listed_on_tec && p.tec_approved).length;
+        const planMeta = { free: { color: 'var(--on-surface-var)', label: 'FREE' }, pro: { color: 'var(--primary)', label: 'PRO' }, enterprise: { color: '#e3b341', label: 'ENTERPRISE' } };
+        const pm = planMeta[tenant.plan] || planMeta.free;
+        return (
+          <div key={tenant.id} className="neon-card" style={{ padding: '16px 18px', marginBottom: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 15 }}>{tenant.hostel_name}</span>
+                  <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 20, border: `1px solid ${pm.color}`, color: pm.color, fontWeight: 700, letterSpacing: '0.06em' }}>{pm.label}</span>
+                  {!tenant.subscription_active && (
+                    <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 20, border: '1px solid rgba(255,110,132,0.3)', color: 'var(--error)', fontWeight: 700 }}>INACTIVE</span>
+                  )}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--on-surface-var)' }}>{tenant.owner_name} • {tenant.email}{tenant.phone ? ` • ${tenant.phone}` : ''}</div>
+                <div style={{ fontSize: 11, color: 'var(--on-surface-var)', marginTop: 4, fontFamily: 'var(--font-mono)' }}>
+                  {tenantProps.length} propert{tenantProps.length === 1 ? 'y' : 'ies'} • {livePropCount} live on TEC • joined {new Date(tenant.created_at).toLocaleDateString()}
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                <button
+                  onClick={async () => {
+                    const newPlan = tenant.plan === 'free' ? 'pro' : tenant.plan === 'pro' ? 'enterprise' : 'free';
+                    if (!window.confirm(`Change ${tenant.owner_name}'s plan from ${tenant.plan} → ${newPlan}?`)) return;
+                    const { error } = await supabase.from('hms_tenants').update({ plan: newPlan }).eq('id', tenant.id);
+                    if (error) { showToast('Error: ' + error.message); return; }
+                    setTenants(ts => ts.map(t => t.id === tenant.id ? { ...t, plan: newPlan } : t));
+                    showToast(`Plan updated to ${newPlan}.`);
+                  }}
+                  style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid rgba(204,151,255,0.3)', background: 'rgba(204,151,255,0.08)', color: 'var(--primary)', fontSize: 11, cursor: 'pointer', fontFamily: 'var(--font-display)', fontWeight: 700 }}>
+                  Change Plan
+                </button>
+              </div>
+            </div>
+            {/* Tenant's properties */}
+            {tenantProps.length > 0 && (
+              <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                {tenantProps.map(prop => (
+                  <div key={prop.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', gap: 10 }}>
+                    <span style={{ fontSize: 12, fontFamily: 'var(--font-display)', fontWeight: 600 }}>{prop.name}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      {prop.listed_on_tec && (
+                        <button
+                          onClick={() => toggleApproval(prop)}
+                          disabled={approvingId === prop.id}
+                          style={{ padding: '4px 10px', borderRadius: 6, border: `1px solid ${prop.tec_approved ? 'rgba(255,110,132,0.3)' : 'rgba(74,222,128,0.3)'}`, background: prop.tec_approved ? 'rgba(255,110,132,0.08)' : 'rgba(74,222,128,0.08)', color: prop.tec_approved ? 'var(--error)' : '#4ade80', fontSize: 10, cursor: 'pointer', fontFamily: 'var(--font-display)', fontWeight: 700, opacity: approvingId === prop.id ? 0.6 : 1 }}>
+                          {approvingId === prop.id ? '…' : prop.tec_approved ? 'Revoke' : 'Approve'}
+                        </button>
+                      )}
+                      <span style={{ fontSize: 9, color: 'var(--on-surface-var)' }}>
+                        {prop.listed_on_tec ? (prop.tec_approved ? '✓ Live' : '⏳ Pending') : 'Not listed'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function AdminPanel() {
   const { user } = useAuth();
   const [tab, setTab] = useState('overview');
@@ -923,7 +1092,7 @@ export default function AdminPanel() {
       <AnimatePresence>
         {tab === 'hms' && (
           <motion.div key="hms" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-            <HostelManagementSystem />
+            <HMSAdminView showToast={showToast} />
           </motion.div>
         )}
       </AnimatePresence>

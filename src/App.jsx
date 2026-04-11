@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import HMSApp from './components/hms/HMSApp';
 import Home from './components/Home';
 import Login from './components/Login';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -93,6 +94,12 @@ function AppShell() {
 }
 
 function App() {
+  // Detect HMS subdomain (hms.*, hms-*, or ?hms=1 for local dev)
+  const hostname = window.location.hostname;
+  const isHMS = hostname.startsWith('hms.') || hostname.startsWith('hms-') || new URLSearchParams(window.location.search).get('hms') === '1';
+
+  if (isHMS) return <HMSApp />;
+
   return (
     <AuthProvider>
       <Router>

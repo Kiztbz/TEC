@@ -259,63 +259,53 @@ export default function Home() {
         {/* ── LEFT: FEED ── */}
         <div>
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28 }}>
-            <div>
-              <h1 className="section-title" style={{ marginBottom: 6 }}>Echo <span className="accent-primary">Feed</span></h1>
-              <p style={{ color: 'var(--on-surface-var)', fontSize: 13 }}>Sub-neural community pulses. Updated real-time.</p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <h2 style={{ fontSize: 20, fontFamily: 'var(--font-display)', fontWeight: 900, letterSpacing: '-0.03em', color: 'var(--on-surface)', margin: 0 }}>
+                Echo <span className="accent-primary">Feed</span>
+              </h2>
+              <span
+                className={realtimeStatus === 'live' ? 'tag-error' : 'tag-secondary'}
+                style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                title={realtimeStatus === 'live' ? 'Real-time connected' : realtimeStatus === 'error' ? 'Connection error' : 'Connecting...'}
+              >
+                <span className="live-dot" style={realtimeStatus === 'error' ? { background: '#e3b341' } : realtimeStatus === 'connecting' ? { background: 'var(--on-surface-var)' } : {}} />
+                {realtimeStatus === 'live' ? 'LIVE' : realtimeStatus === 'error' ? 'OFFLINE' : 'SYNC'}
+              </span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, marginTop: 4 }}>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <span
-                  className={realtimeStatus === 'live' ? 'tag-error' : 'tag-secondary'}
-                  style={{ display: 'flex', alignItems: 'center', gap: 5 }}
-                  title={realtimeStatus === 'live' ? 'Real-time connected' : realtimeStatus === 'error' ? 'Connection error' : 'Connecting...'}
-                >
-                  <span className="live-dot" style={realtimeStatus === 'error' ? { background: '#e3b341' } : realtimeStatus === 'connecting' ? { background: 'var(--on-surface-var)', animationPlayState: 'running' } : {}} />
-                  {realtimeStatus === 'live' ? 'LIVE' : realtimeStatus === 'error' ? 'OFFLINE' : 'CONNECTING'}
-                </span>
-                <span className="tag-secondary">ACTIVE</span>
+            {totalXp > 0 && (
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 800, color: '#e3b341', letterSpacing: '0.06em', background: 'rgba(227,179,65,0.08)', border: '1px solid rgba(227,179,65,0.2)', borderRadius: 5, padding: '2px 8px' }}>
+                +{totalXp} XP
               </div>
-              {/* Running XP tally */}
-              {totalXp > 0 && (
-                <div style={{
-                  fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 800,
-                  color: '#e3b341', letterSpacing: '0.06em',
-                  background: 'rgba(227,179,65,0.08)',
-                  border: '1px solid rgba(227,179,65,0.2)',
-                  borderRadius: 6, padding: '3px 10px',
-                }}>+{totalXp} XP EARNED</div>
-              )}
-            </div>
+            )}
           </div>
 
           {/* Post composer */}
-          <div className="neon-card" style={{ padding: 20, marginBottom: 24 }}>
-            {!user && (
-              <div style={{ color: 'var(--on-surface-var)', fontSize: 13, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)' }}>
-                <span className="material-symbols-outlined" style={{ fontSize: 16, opacity: 0.5 }}>lock</span>
-                Sign in to relay a pulse
+          <div className="neon-card" style={{ padding: 16, marginBottom: 12 }}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(204,151,255,0.08)', border: '1px solid rgba(204,151,255,0.18)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 16, color: 'var(--on-surface-var)', opacity: 0.5 }}>person</span>
               </div>
-            )}
-            <textarea value={postText} onChange={e => { setPostText(e.target.value); if (postError) setPostError(''); }}
-              className="neon-input" rows={3} placeholder="Relay a pulse to the campus..."
-              style={{ resize: 'none', borderRadius: 10, marginBottom: 10 }}
-              maxLength={1000} disabled={!user} />
+              <textarea value={postText} onChange={e => { setPostText(e.target.value); if (postError) setPostError(''); }}
+                className="neon-input" rows={3} placeholder={user ? "What's on your mind?" : 'Sign in to post...'}
+                style={{ resize: 'none', borderRadius: 8, fontSize: 13, flex: 1 }}
+                maxLength={1000} disabled={!user} />
+            </div>
             {postError && (
-              <div style={{ color: '#FF6E84', fontSize: 12, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ color: '#FF6E84', fontSize: 12, marginTop: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 14 }}>error</span>
                 {postError}
               </div>
             )}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: postText.length > 900 ? '#e3b341' : 'var(--on-surface-var)', opacity: 0.65, transition: 'color 0.2s' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: postText.length > 900 ? '#e3b341' : 'var(--on-surface-var)', opacity: 0.6, transition: 'color 0.2s' }}>
                   {postText.length}/1000
                 </span>
                 {user && (
                   <button onClick={() => setIsAnon(a => !a)}
                     title={isAnon ? 'Posting anonymously — identity hidden from others, visible to admins' : 'Post as yourself'}
-                    style={{ display: 'flex', alignItems: 'center', gap: 5, background: isAnon ? 'rgba(204,151,255,0.1)' : 'transparent', border: isAnon ? '1px solid rgba(204,151,255,0.35)' : '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '4px 10px', cursor: 'pointer', color: isAnon ? 'var(--primary)' : 'var(--on-surface-var)', fontSize: 11, fontFamily: 'var(--font-body)', transition: 'all 0.15s' }}>
+                    style={{ display: 'flex', alignItems: 'center', gap: 5, background: isAnon ? 'rgba(204,151,255,0.1)' : 'transparent', border: isAnon ? '1px solid rgba(204,151,255,0.35)' : '1px solid rgba(255,255,255,0.08)', borderRadius: 7, padding: '4px 10px', cursor: 'pointer', color: isAnon ? 'var(--primary)' : 'var(--on-surface-var)', fontSize: 11, fontFamily: 'var(--font-body)', transition: 'all 0.15s' }}>
                     <span className="material-symbols-outlined" style={{ fontSize: 13 }}>{isAnon ? 'visibility_off' : 'visibility'}</span>
                     {isAnon ? 'Anon' : 'Public'}
                   </button>
@@ -323,15 +313,15 @@ export default function Home() {
               </div>
               <button className="btn-ghost-cyan" onClick={handleRelay}
                 disabled={submittingPost || !postText.trim() || !user}
-                style={{ fontSize: 11, padding: '6px 20px', letterSpacing: '0.08em', opacity: (submittingPost || !postText.trim() || !user) ? 0.4 : 1, display: 'flex', alignItems: 'center', gap: 7 }}>
-                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>send</span>
-                {submittingPost ? 'POSTING...' : 'RELAY'}
+                style={{ fontSize: 11, padding: '5px 16px', letterSpacing: '0.07em', opacity: (submittingPost || !postText.trim() || !user) ? 0.35 : 1, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 13 }}>send</span>
+                {submittingPost ? 'POSTING...' : 'POST'}
               </button>
             </div>
           </div>
 
           {/* Posts */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {!loadingPosts && posts.length === 0 && (
               <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--on-surface-var)' }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 40, opacity: 0.25, display: 'block', marginBottom: 12 }}>chat_bubble</span>
@@ -340,88 +330,70 @@ export default function Home() {
             )}
             {posts.map((post, idx) => (
               <React.Fragment key={post.id}>
-                <motion.article className="neon-card mission-card" style={{
-                  padding: 24, position: 'relative', overflow: 'hidden',
-                  borderLeft: `3px solid ${post.missionColor}40`,
+                <motion.article className="neon-card" style={{
+                  padding: '12px 16px 12px 12px',
+                  borderLeft: `3px solid ${voted[post.id] ? post.missionColor : post.missionColor + '35'}`,
+                  transition: 'border-color 0.25s',
                 }}
-                  initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-                  {/* Left accent stripe */}
-                  <div style={{
-                    position: 'absolute', left: 0, top: 0, bottom: 0, width: 3,
-                    background: post.missionColor, opacity: voted[post.id] ? 1 : 0.35,
-                    transition: 'opacity 0.3s',
-                  }} />
-                  {/* Mission type */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                    <span className="mission-type" style={{ background: `${post.missionColor}18`, color: post.missionColor, border: `1px solid ${post.missionColor}35` }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: 9 }}>radio_button_checked</span>
-                      {post.missionType}
-                    </span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      {post.xpReward && (
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#e3b341', letterSpacing: '0.08em' }}>+{post.xpReward} XP</span>
-                      )}
-                      {post.kernel && (
-                        <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--secondary)', opacity: 0.5 }}>{post.kernel}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 16 }}>
+                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+                  <div style={{ display: 'flex', gap: 10 }}>
                     {/* Vote column */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flexShrink: 0, position: 'relative' }}>
-                      {/* XP popup */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flexShrink: 0, width: 32, position: 'relative' }}>
                       {xpPopups[post.id] && (
                         <div key={xpPopups[post.id]} className="xp-popup" style={{ top: -8, left: '50%', transform: 'translateX(-50%)' }}>
                           +{post.xpReward} XP
                         </div>
                       )}
-                      <button className="upvote-btn" onClick={() => handleVote(post.id)}
-                        title={voted[post.id] ? 'Remove upvote' : 'Upvote this post'}
-                        style={voted[post.id] ? { background: `${post.missionColor}25`, borderColor: `${post.missionColor}60` } : {}}>
-                        <span className="material-symbols-outlined" style={{ fontSize: 18, color: voted[post.id] ? post.missionColor : undefined }}>expand_less</span>
+                      <button onClick={() => handleVote(post.id)}
+                        title={voted[post.id] ? 'Remove upvote' : 'Upvote'}
+                        style={{ width: 32, height: 28, borderRadius: 6, background: voted[post.id] ? `${post.missionColor}18` : 'var(--surface-highest)', border: `1px solid ${voted[post.id] ? post.missionColor + '55' : 'rgba(255,255,255,0.07)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.15s', padding: 0 }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: 18, color: voted[post.id] ? post.missionColor : 'var(--on-surface-var)', transition: 'color 0.15s' }}>expand_less</span>
                       </button>
-                      <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: voted[post.id] ? post.missionColor : 'var(--on-surface)', minWidth: 20, textAlign: 'center' }}>{votes[post.id] ?? 0}</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 12, color: voted[post.id] ? post.missionColor : 'var(--on-surface-var)', lineHeight: 1, textAlign: 'center' }}>{votes[post.id] ?? 0}</span>
                     </div>
                     {/* Content */}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
-                        <span style={{ fontWeight: 700, color: 'var(--on-surface)', fontFamily: 'var(--font-display)' }}>{post.user}</span>
+                      {/* Meta */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
+                        <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--on-surface)', fontFamily: 'var(--font-display)' }}>{post.user}</span>
                         {post.is_anonymous && user?.role === 'admin' && (
-                          <span style={{ fontSize: 10, color: 'rgba(204,151,255,0.6)', fontFamily: 'var(--font-mono)', letterSpacing: '0.03em' }}>({post.real_name})</span>
+                          <span style={{ fontSize: 11, color: 'rgba(204,151,255,0.6)', fontFamily: 'var(--font-mono)' }}>({post.real_name})</span>
                         )}
                         {post.is_anonymous && (
-                          <span style={{ fontSize: 9, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, padding: '1px 6px', color: 'var(--on-surface-var)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>ANON</span>
+                          <span style={{ fontSize: 9, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, padding: '1px 5px', color: 'var(--on-surface-var)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>ANON</span>
                         )}
-                        <span style={{ fontSize: 12, color: 'var(--on-surface-var)' }}>{post.time}</span>
                         {post.badge && (
-                          <span className="tag-primary" style={{ fontSize: 8, letterSpacing: '0.1em' }}>{post.badge.toUpperCase()}</span>
+                          <span className="tag-primary" style={{ fontSize: 9, padding: '1px 7px' }}>{post.badge.toUpperCase()}</span>
                         )}
+                        <span style={{ fontSize: 11, color: 'var(--on-surface-var)', opacity: 0.6 }}>{post.time}</span>
                       </div>
-                      <p style={{ color: 'var(--on-surface-var)', lineHeight: 1.6, marginBottom: 14 }}>{post.body}</p>
+                      {/* Body */}
+                      <p style={{ fontSize: 14, color: 'var(--on-surface-var)', lineHeight: 1.55, marginBottom: 10 }}>{post.body}</p>
                       {post.code && (
-                        <div style={{ background: 'var(--surface-highest)', border: '1px solid rgba(255,255,255,0.07)', borderLeft: '3px solid var(--primary)', borderRadius: 10, padding: '12px 16px', marginBottom: 14 }}>
-                          <pre style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--secondary)', margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{post.code}</pre>
+                        <div style={{ background: 'var(--surface-highest)', border: '1px solid rgba(255,255,255,0.07)', borderLeft: '3px solid var(--primary)', borderRadius: 8, padding: '10px 14px', marginBottom: 10 }}>
+                          <pre style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--secondary)', margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>{post.code}</pre>
                         </div>
                       )}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                      {/* Action bar */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         <button onClick={() => toggleReplies(post.id)}
-                          style={{ display: 'flex', alignItems: 'center', gap: 6, color: expandedReplies.has(post.id) ? 'var(--secondary)' : 'var(--on-surface-var)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, transition: 'color 0.14s', fontFamily: 'var(--font-body)', padding: 0 }}
-                          onMouseEnter={e => e.currentTarget.style.color = 'var(--secondary)'}
-                          onMouseLeave={e => e.currentTarget.style.color = expandedReplies.has(post.id) ? 'var(--secondary)' : 'var(--on-surface-var)'}>
-                          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>{expandedReplies.has(post.id) ? 'chat_bubble' : 'chat_bubble_outline'}</span>
-                          {post.replyCount > 0 ? `${post.replyCount} Response${post.replyCount !== 1 ? 's' : ''}` : 'Reply'}
+                          style={{ display: 'flex', alignItems: 'center', gap: 5, color: expandedReplies.has(post.id) ? 'var(--secondary)' : 'var(--on-surface-var)', background: expandedReplies.has(post.id) ? 'rgba(83,221,252,0.07)' : 'transparent', border: 'none', cursor: 'pointer', fontSize: 12, borderRadius: 6, padding: '4px 8px', fontFamily: 'var(--font-body)', transition: 'all 0.14s' }}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'var(--on-surface)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = expandedReplies.has(post.id) ? 'rgba(83,221,252,0.07)' : 'transparent'; e.currentTarget.style.color = expandedReplies.has(post.id) ? 'var(--secondary)' : 'var(--on-surface-var)'; }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: 15 }}>{expandedReplies.has(post.id) ? 'chat_bubble' : 'chat_bubble_outline'}</span>
+                          {post.replyCount > 0 ? `${post.replyCount} Comment${post.replyCount !== 1 ? 's' : ''}` : 'Comment'}
                         </button>
                       </div>
 
                       {/* ── Replies section ── */}
                       {expandedReplies.has(post.id) && (
-                        <div style={{ marginTop: 14, paddingLeft: 14, borderLeft: '2px solid rgba(255,255,255,0.07)' }}>
+                        <div style={{ marginTop: 12, paddingLeft: 12, borderLeft: '2px solid rgba(255,255,255,0.07)' }}>
                           {(repliesData[post.id] || []).length === 0 && (
-                            <p style={{ fontSize: 12, color: 'var(--on-surface-var)', opacity: 0.45, margin: '0 0 10px' }}>No responses yet. Be the first.</p>
+                            <p style={{ fontSize: 12, color: 'var(--on-surface-var)', opacity: 0.45, margin: '0 0 10px' }}>No comments yet.</p>
                           )}
                           {(repliesData[post.id] || []).map((reply, ri) => (
-                            <div key={reply.id} style={{ marginBottom: 12, paddingBottom: 12, borderBottom: ri < (repliesData[post.id].length - 1) ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4, flexWrap: 'wrap' }}>
+                            <div key={reply.id} style={{ marginBottom: 10, paddingBottom: 10, borderBottom: ri < (repliesData[post.id].length - 1) ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, flexWrap: 'wrap' }}>
                                 <span style={{ fontWeight: 700, fontSize: 12, color: 'var(--on-surface)', fontFamily: 'var(--font-display)' }}>{reply.user}</span>
                                 {reply.is_anonymous && user?.role === 'admin' && (
                                   <span style={{ fontSize: 10, color: 'rgba(204,151,255,0.55)', fontFamily: 'var(--font-mono)' }}>({reply.real_name})</span>
@@ -429,38 +401,36 @@ export default function Home() {
                                 {reply.is_anonymous && (
                                   <span style={{ fontSize: 9, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, padding: '1px 5px', color: 'var(--on-surface-var)', fontFamily: 'var(--font-mono)' }}>ANON</span>
                                 )}
-                                <span style={{ fontSize: 11, color: 'var(--on-surface-var)' }}>{reply.time}</span>
+                                <span style={{ fontSize: 11, color: 'var(--on-surface-var)', opacity: 0.55 }}>{reply.time}</span>
                               </div>
-                              <p style={{ fontSize: 13, color: 'var(--on-surface-var)', lineHeight: 1.55, margin: 0 }}>{reply.body}</p>
+                              <p style={{ fontSize: 13, color: 'var(--on-surface-var)', lineHeight: 1.5, margin: 0 }}>{reply.body}</p>
                             </div>
                           ))}
                           {user && (
-                            <div style={{ marginTop: 6 }}>
+                            <div style={{ marginTop: 8, display: 'flex', gap: 6, alignItems: 'center' }}>
                               <input
                                 value={replyText[post.id] || ''}
                                 onChange={e => setReplyText(prev => ({ ...prev, [post.id]: e.target.value }))}
                                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmitReply(post.id); } }}
                                 className="neon-input"
-                                placeholder="Write a response..."
+                                placeholder="Write a reply..."
                                 maxLength={500}
-                                style={{ width: '100%', height: 36, borderRadius: 8, fontSize: 13, boxSizing: 'border-box', marginBottom: 8 }}
+                                style={{ flex: 1, height: 34, borderRadius: 7, fontSize: 13, boxSizing: 'border-box', padding: '5px 10px' }}
                               />
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <button
-                                  onClick={() => setReplyAnon(prev => ({ ...prev, [post.id]: !prev[post.id] }))}
-                                  title={replyAnon[post.id] ? 'Replying anonymously' : 'Reply as yourself'}
-                                  style={{ display: 'flex', alignItems: 'center', gap: 5, background: replyAnon[post.id] ? 'rgba(204,151,255,0.1)' : 'transparent', border: replyAnon[post.id] ? '1px solid rgba(204,151,255,0.35)' : '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '4px 10px', cursor: 'pointer', color: replyAnon[post.id] ? 'var(--primary)' : 'var(--on-surface-var)', fontSize: 11, fontFamily: 'var(--font-body)', transition: 'all 0.15s' }}>
-                                  <span className="material-symbols-outlined" style={{ fontSize: 13 }}>{replyAnon[post.id] ? 'visibility_off' : 'visibility'}</span>
-                                  {replyAnon[post.id] ? 'Anon' : 'Public'}
-                                </button>
-                                <button
-                                  onClick={() => handleSubmitReply(post.id)}
-                                  disabled={!replyText[post.id]?.trim() || submittingReply[post.id]}
-                                  style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(83,221,252,0.08)', border: '1px solid rgba(83,221,252,0.25)', borderRadius: 8, padding: '5px 14px', cursor: 'pointer', color: 'var(--secondary)', fontSize: 11, fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: '0.06em', opacity: (!replyText[post.id]?.trim() || submittingReply[post.id]) ? 0.4 : 1, transition: 'all 0.14s' }}>
-                                  <span className="material-symbols-outlined" style={{ fontSize: 12 }}>send</span>
-                                  {submittingReply[post.id] ? '...' : 'REPLY'}
-                                </button>
-                              </div>
+                              <button
+                                onClick={() => setReplyAnon(prev => ({ ...prev, [post.id]: !prev[post.id] }))}
+                                title={replyAnon[post.id] ? 'Replying anonymously' : 'Reply as yourself'}
+                                style={{ height: 34, display: 'flex', alignItems: 'center', gap: 4, background: replyAnon[post.id] ? 'rgba(204,151,255,0.1)' : 'transparent', border: replyAnon[post.id] ? '1px solid rgba(204,151,255,0.35)' : '1px solid rgba(255,255,255,0.08)', borderRadius: 7, padding: '0 9px', cursor: 'pointer', color: replyAnon[post.id] ? 'var(--primary)' : 'var(--on-surface-var)', fontSize: 11, fontFamily: 'var(--font-body)', transition: 'all 0.15s', flexShrink: 0 }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>{replyAnon[post.id] ? 'visibility_off' : 'visibility'}</span>
+                                {replyAnon[post.id] ? 'Anon' : 'Public'}
+                              </button>
+                              <button
+                                onClick={() => handleSubmitReply(post.id)}
+                                disabled={!replyText[post.id]?.trim() || submittingReply[post.id]}
+                                style={{ height: 34, display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(83,221,252,0.08)', border: '1px solid rgba(83,221,252,0.25)', borderRadius: 7, padding: '0 12px', cursor: 'pointer', color: 'var(--secondary)', fontSize: 11, fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: '0.05em', opacity: (!replyText[post.id]?.trim() || submittingReply[post.id]) ? 0.4 : 1, transition: 'all 0.14s', flexShrink: 0 }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: 13 }}>send</span>
+                                {submittingReply[post.id] ? '...' : 'REPLY'}
+                              </button>
                             </div>
                           )}
                         </div>

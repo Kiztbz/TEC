@@ -64,15 +64,43 @@ export default function Listings() {
   const [listingsData, setListingsData] = useState(DATA);
 
   useEffect(() => {
-    supabase.from('admin_listings').select('*').order('created_at', { ascending: false })
-      .then(({ data }) => {
-        if (data && data.length > 0) {
-          const grouped = {};
-          TABS.forEach(t => grouped[t] = []);
-          data.forEach(item => { if (grouped[item.tab]) grouped[item.tab].push(item); });
-          setListingsData(grouped);
-        }
-      });
+    async function load() {
+      // Fetch admin-controlled listings
+      const { data: adminData } = await supabase
+        .from('admin_listings')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      // Fetch HMS-managed hostels that are listed & approved
+      const { data: hmsData } = await supabase
+        .from('hms_properties')
+        .select('name, loc, price, tags, desc, rating, reviews, gender')
+        .eq('listed_on_tec', true)
+        .eq('tec_approved', true);
+
+      // Build the grouped object starting from static DATA (fallback)
+      const grouped = {};
+      TABS.forEach(t => grouped[t] = [...(DATA[t] || [])]);
+
+      // HMS hostels go to top of PG / Hostels tab with a verified flag
+      if (hmsData && hmsData.length > 0) {
+        const hmsFormatted = hmsData.map(h => ({
+          ...h,
+          tags: Array.isArray(h.tags) ? h.tags : (h.tags || '').split(',').map(t => t.trim()).filter(Boolean),
+          hmsVerified: true,
+        }));
+        grouped['PG / Hostels'] = [...hmsFormatted, ...grouped['PG / Hostels']];
+      }
+
+      // Admin listings override / append per tab
+      if (adminData && adminData.length > 0) {
+        TABS.forEach(t => { grouped[t] = grouped[t] || []; });
+        adminData.forEach(item => { if (grouped[item.tab]) grouped[item.tab].push(item); });
+      }
+
+      setListingsData(grouped);
+    }
+    load();
   }, []);
 
   const items = (listingsData[tab] || []).filter(item =>
@@ -116,7 +144,14 @@ export default function Listings() {
         <motion.div key={item.name} className="neon-card" style={{ padding: 22, borderTop: `2px solid ${TAB_COLOR[tab] || "var(--primary)"}` }}
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.025 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-            <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 15, letterSpacing: "-0.02em", flex: 1, marginRight: 8 }}>{item.name}</h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, marginRight: 8 }}>
+              <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 15, letterSpacing: "-0.02em" }}>{item.name}</h3>
+              {item.hmsVerified && (
+                <span title="Verified HMS Property" style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 9, padding: '2px 6px', borderRadius: 20, background: 'rgba(204,151,255,0.12)', border: '1px solid rgba(204,151,255,0.3)', color: 'var(--primary)', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 10 }}>verified</span>HMS
+                </span>
+              )}
+            </div>
             <span style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 14, color: TAB_COLOR[tab] || "var(--primary)", whiteSpace: "nowrap" }}>Rs.{item.price}</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
