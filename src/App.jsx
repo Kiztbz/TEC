@@ -94,9 +94,15 @@ function AppShell() {
 }
 
 function App() {
-  // Detect HMS subdomain (hms.*, hms-*, or ?hms=1 for local dev)
+  // Detect HMS portal: subdomain (hms.*) OR path (/hms or /hms/*) OR ?hms=1 for local dev
   const hostname = window.location.hostname;
-  const isHMS = hostname.startsWith('hms.') || hostname.startsWith('hms-') || new URLSearchParams(window.location.search).get('hms') === '1';
+  const pathname = window.location.pathname;
+  const isHMS =
+    hostname.startsWith('hms.') ||
+    hostname.startsWith('hms-') ||
+    pathname === '/hms' ||
+    pathname.startsWith('/hms/') ||
+    new URLSearchParams(window.location.search).get('hms') === '1';
 
   if (isHMS) return <HMSApp />;
 

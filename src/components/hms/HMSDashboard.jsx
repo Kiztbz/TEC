@@ -163,7 +163,7 @@ function Overview({ tenant, properties }) {
 /* ── Property listing settings ── */
 function ListingSettings({ tenant, properties, onRefresh }) {
     const [saving, setSaving] = useState(null);
-    const [form, setForm] = useState({ name: '', loc: '', price: '', tags: '', desc: '', rating: 4.0, gender: 'any', total_beds: 0, listed_on_tec: false });
+    const [form, setForm] = useState({ name: '', loc: '', price: '', tags: '', description: '', rating: 4.0, gender: 'any', total_beds: 0, listed_on_tec: false });
     const [showForm, setShowForm] = useState(false);
     const [toast, setToast] = useState('');
     const canList = tenant.plan !== 'free';
@@ -189,7 +189,7 @@ function ListingSettings({ tenant, properties, onRefresh }) {
             loc: form.loc.trim(),
             price: form.price.trim(),
             tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
-            desc: form.desc.trim(),
+            description: form.description.trim(),
             rating: parseFloat(form.rating) || 0,
             gender: form.gender,
             total_beds: parseInt(form.total_beds) || 0,
@@ -198,7 +198,7 @@ function ListingSettings({ tenant, properties, onRefresh }) {
             tec_approved: false,
         });
         if (error) showToast('Error: ' + error.message);
-        else { setShowForm(false); setForm({ name: '', loc: '', price: '', tags: '', desc: '', rating: 4.0, gender: 'any', total_beds: 0, listed_on_tec: false }); onRefresh(); showToast('Property added!'); }
+        else { setShowForm(false); setForm({ name: '', loc: '', price: '', tags: '', description: '', rating: 4.0, gender: 'any', total_beds: 0, listed_on_tec: false }); onRefresh(); showToast('Property added!'); }
     }
 
     return (
@@ -259,7 +259,7 @@ function ListingSettings({ tenant, properties, onRefresh }) {
                         </div>
                         <div style={{ gridColumn: '1 / -1' }}>
                             <label style={{ fontSize: 11, color: 'var(--on-surface-var)', fontWeight: 600, display: 'block', marginBottom: 5 }}>DESCRIPTION</label>
-                            <textarea className="neon-input" value={form.desc} onChange={e => setForm(f => ({ ...f, desc: e.target.value }))} placeholder="Describe your hostel…" rows={3} style={{ width: '100%', resize: 'vertical' }} />
+                            <textarea className="neon-input" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Describe your hostel…" rows={3} style={{ width: '100%', resize: 'vertical' }} />
                         </div>
                         <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 8 }}>
                             <button type="submit" className="btn-primary" style={{ padding: '9px 20px', fontSize: 12 }}>Save Property</button>

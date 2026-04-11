@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS public.hms_properties (
   loc           TEXT        NOT NULL,
   price         TEXT        NOT NULL,           -- e.g. "6,500/mo"
   tags          TEXT[]      NOT NULL DEFAULT '{}',
-  desc          TEXT,
+  description   TEXT,
   rating        NUMERIC(3,1) NOT NULL DEFAULT 0.0 CHECK (rating BETWEEN 0 AND 5),
   reviews       INT         NOT NULL DEFAULT 0,
   gender        TEXT        NOT NULL DEFAULT 'any' CHECK (gender IN ('boys', 'girls', 'any')),

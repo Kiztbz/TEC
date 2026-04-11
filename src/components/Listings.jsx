@@ -74,7 +74,7 @@ export default function Listings() {
       // Fetch HMS-managed hostels that are listed & approved
       const { data: hmsData } = await supabase
         .from('hms_properties')
-        .select('name, loc, price, tags, desc, rating, reviews, gender')
+        .select('name, loc, price, tags, description, rating, reviews, gender')
         .eq('listed_on_tec', true)
         .eq('tec_approved', true);
 
@@ -159,7 +159,7 @@ export default function Listings() {
             <span style={{ fontSize: 12, color: "var(--on-surface-var)" }}>{item.loc}</span>
             <span style={{ marginLeft: "auto" }}><Stars rating={item.rating} /></span>
           </div>
-          <p style={{ fontSize: 13, color: "var(--on-surface-var)", lineHeight: 1.5, marginBottom: 12 }}>{item.desc}</p>
+          <p style={{ fontSize: 13, color: "var(--on-surface-var)", lineHeight: 1.5, marginBottom: 12 }}>{item.description || item.desc}</p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 14 }}>
             {(Array.isArray(item.tags) ? item.tags : (item.tags || '').split(',').map(t => t.trim()).filter(Boolean))
               .map(t => <span key={t} className="tag-ghost" style={{ fontSize: 10 }}>{t}</span>)}

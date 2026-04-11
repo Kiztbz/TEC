@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/hms",
+      "destination": "/"
+    },
+    {
+      "source": "/hms/(.*)",
+      "destination": "/"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }
